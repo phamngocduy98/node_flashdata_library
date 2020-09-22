@@ -14,24 +14,32 @@ import {
 } from "../internal";
 
 export type DatabaseDocumentConstructor<D extends DocumentData> = {
-    new(
-        root: Database,
-        ref: admin.database.Reference,
-        parent: DatabaseDocumentParent,
-        dataValue: D
-    ): DatabaseDocument<D>
+    new (root: Database, ref: admin.database.Reference, parent: DatabaseDocumentParent, dataValue: D): DatabaseDocument<
+        D
+    >;
 };
 export type DatabaseDocumentParent = DatabaseCollection<any> | Database | DatabaseDocument<any>;
 export type DocumentDataOf<T> = T extends DatabaseDocument<infer D> ? D : never;
-export type DocumentDataCreationType<D extends DocumentData> = { [key in keyof D]: (D[key] extends DocumentData ? DocumentDataCreationType<D[key]> : D[key]) };
-export type DocumentDataUpdateType<D extends DocumentData> = Partial<{ [key in keyof D]: (D[key] extends DocumentData ? DocumentDataUpdateType<D[key]> : D[key]) }>;
+export type DocumentDataCreationType<D extends DocumentData> = Omit<
+    {
+        [key in keyof D]: D[key] extends DocumentData ? DocumentDataCreationType<D[key]> : D[key];
+    },
+    "_key"
+>;
+export type DocumentDataUpdateType<D extends DocumentData> = Partial<
+    Omit<{[key in keyof D]: D[key] extends DocumentData ? DocumentDataUpdateType<D[key]> : D[key]}, "_key">
+>;
 
-export type DocumentDataPropertyNames<D> = D extends DocumentData ? { [key in keyof D]: (D[key] extends DocumentData ? key : never) }[keyof D] : never;
-export type CollectionDataPropertyNames<D> = D extends DocumentData ? { [key in keyof D]: (D[key] extends Map<string, any> ? key : never) }[keyof D] : never;
+export type DocumentDataPropertyNames<D> = D extends DocumentData
+    ? {[key in keyof D]: D[key] extends DocumentData ? key : never}[keyof D]
+    : never;
+export type CollectionDataPropertyNames<D> = D extends DocumentData
+    ? {[key in keyof D]: D[key] extends Map<string, any> ? key : never}[keyof D]
+    : never;
 
 /**
- * DatabaseDocument class for Realtime Flashbase Library
- * https://github.com/phamngocduy98/node_flashbase_library
+ * DatabaseDocument class for FlashData - Realtime Database Library
+ * https://github.com/phamngocduy98/node_flashdata_library
  */
 export class DatabaseDocument<D extends DocumentData> extends IsCollectionParent {
     protected _nested: Map<string, DatabaseDocument<any>>;
@@ -76,7 +84,7 @@ export class DatabaseDocument<D extends DocumentData> extends IsCollectionParent
         for (let property in val) {
             if (this[property as keyof this] instanceof IDatabaseEntity && snap.hasChild(property)) {
                 // nested document/collection/mapArray
-                (this[property as keyof this] as any as IDatabaseEntity)._onSnap(snap.child(property));
+                ((this[property as keyof this] as any) as IDatabaseEntity)._onSnap(snap.child(property));
             } else {
                 // normal value
                 (this._dataValue as any)[property] = val[property];
@@ -95,12 +103,18 @@ export class DatabaseDocument<D extends DocumentData> extends IsCollectionParent
         return this._dataValue;
     }
 
-    nested<D2 extends D[DocumentDataPropertyNames<D>]>(key: DocumentDataPropertyNames<D>): RealtimeDocument<Extract<D[typeof key], D2>> {
-        return this._nested.get(key as string) as any as RealtimeDocument<Extract<D[typeof key], D2>>;
+    nested<D2 extends D[DocumentDataPropertyNames<D>]>(
+        key: DocumentDataPropertyNames<D>
+    ): RealtimeDocument<Extract<D[typeof key], D2>> {
+        return (this._nested.get(key as string) as any) as RealtimeDocument<Extract<D[typeof key], D2>>;
     }
 
-    subCollection<D2 extends DataTypeOfCollectionData<D[CollectionDataPropertyNames<D>]>>(key: CollectionDataPropertyNames<D>): RealtimeCollection<Extract<DataTypeOfCollectionData<D[typeof key]>, D2>> {
-        return super.collection(key as string)! as RealtimeCollection<Extract<DataTypeOfCollectionData<D[typeof key]>, D2>>;
+    subCollection<D2 extends DataTypeOfCollectionData<D[CollectionDataPropertyNames<D>]>>(
+        key: CollectionDataPropertyNames<D>
+    ): RealtimeCollection<Extract<DataTypeOfCollectionData<D[typeof key]>, D2>> {
+        return super.collection(key as string)! as RealtimeCollection<
+            Extract<DataTypeOfCollectionData<D[typeof key]>, D2>
+        >;
     }
 
     subMap(key: CollectionDataPropertyNames<D>): RealtimeMap<any> {
@@ -137,13 +151,15 @@ export class DatabaseDocument<D extends DocumentData> extends IsCollectionParent
     async update(updateParams: DocumentDataUpdateType<D>) {
         this.isExists = true;
         let firstLeverData: Partial<D> = {};
-        for (let key in updateParams) {
+        const updateParamsKeys = Object.keys(updateParams).filter((key) => !["_key"].includes(key));
+        for (let _key of updateParamsKeys) {
+            let key = _key as keyof DocumentDataUpdateType<D>;
             // if (this.dataValue.hasOwnProperty(key)) {
             const thisAtKey = this[key as keyof this];
             if (thisAtKey instanceof DatabaseDocument) {
                 await (thisAtKey as DatabaseDocument<any>).update(updateParams[key]!);
             } else if (updateParams[key] instanceof CollectionCreationData) {
-                const collectionDataValues = (updateParams[key] as any as CollectionCreationData<any>);
+                const collectionDataValues = (updateParams[key] as any) as CollectionCreationData<any>;
                 if (thisAtKey instanceof DatabaseCollection) {
                     for (let itemToAdd of collectionDataValues.valuesToAdd) {
                         await (thisAtKey as DatabaseCollection<any>).set(undefined, itemToAdd);
@@ -152,7 +168,7 @@ export class DatabaseDocument<D extends DocumentData> extends IsCollectionParent
                     console.error("Property at '" + key + "' is not DatabaseCollection");
                 }
             } else if (updateParams[key] instanceof Map) {
-                const collectionDataValues = (updateParams[key] as any as Map<string, any>);
+                const collectionDataValues = (updateParams[key] as any) as Map<string, any>;
                 if (thisAtKey instanceof DatabaseCollection) {
                     for (let [k, v] of collectionDataValues) {
                         await (thisAtKey as DatabaseCollection<any>).child(k).update(v);
@@ -179,7 +195,7 @@ export class DatabaseDocument<D extends DocumentData> extends IsCollectionParent
      * @param updateCallback
      */
     updateInTransaction(updateCallback: (currentData: DocumentDataCreationType<D>) => DocumentDataCreationType<D>) {
-        this.ref.transaction(updateCallback);
+        return this.ref.transaction(updateCallback);
     }
 
     getRoot(): Database {

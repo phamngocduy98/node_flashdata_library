@@ -12,8 +12,8 @@ import {
 } from "../internal";
 
 /**
- * DatabaseCollection class for Realtime Flashbase Library
- * https://github.com/phamngocduy98/node_flashbase_library
+ * DatabaseCollection class for FlashData - Realtime Database Library
+ * https://github.com/phamngocduy98/node_flashdata_library
  */
 export class DatabaseCollection<D extends DocumentData> extends AbstractRealtimeList<DatabaseDocument<D>> {
     _value: Map<String, D>;
@@ -29,7 +29,7 @@ export class DatabaseCollection<D extends DocumentData> extends AbstractRealtime
     }
 
     _onSnap(snap: admin.database.DataSnapshot) {
-        snap.forEach(childSnap => {
+        snap.forEach((childSnap) => {
             this.child(childSnap.key!)._onSnap(childSnap);
         });
     }
@@ -40,6 +40,7 @@ export class DatabaseCollection<D extends DocumentData> extends AbstractRealtime
             return doc;
         } else {
             let newData = new this.itemConstructor();
+            newData._key = key;
             let newDoc = new DatabaseDocument<D>(this.root, this.ref.child(key), this, newData);
             this._listSet(key, newDoc);
             return newDoc;
@@ -67,7 +68,7 @@ export class DatabaseCollection<D extends DocumentData> extends AbstractRealtime
     async children() {
         let snaps = await this.ref.once("value");
         let docs: DatabaseDocument<D>[] = [];
-        snaps.forEach(snap => {
+        snaps.forEach((snap) => {
             let doc = this.child(snap.key!);
             docs.push(doc);
             doc._onSnap(snap);

@@ -1,6 +1,6 @@
 // *
-// * Decorator functions for Realtime FlashBase Library
-// * https://github.com/phamngocduy98/node_flashbase_library
+// * Decorator functions for FlashData - Realtime Database Library
+// * https://github.com/phamngocduy98/node_flashdata_library
 // *
 
 import "reflect-metadata";
@@ -12,7 +12,7 @@ export type MapArrayTypes = "string" | "number" | "boolean";
 
 export interface ICollectionRegistrationMetadata {
     collectionName: string;
-    dataConstructor?: { new(...args: any): DocumentData };
+    dataConstructor?: {new (...args: any): DocumentData};
     type?: MapArrayTypes;
 }
 

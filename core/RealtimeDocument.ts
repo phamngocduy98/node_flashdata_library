@@ -3,22 +3,17 @@ import * as admin from "firebase-admin";
 import {Database, DatabaseDocument, DatabaseDocumentParent, DocumentData} from "../internal";
 
 /**
- * RealtimeDocument class for Realtime Flashbase Library
- * https://github.com/phamngocduy98/node_flashbase_library
+ * RealtimeDocument class for FlashData - Realtime Database Library
+ * https://github.com/phamngocduy98/node_flashdata_library
  */
 export class RealtimeDocument<D extends DocumentData> extends DatabaseDocument<D> {
     changedListeners: Array<OnDocumentChangedCallback<this>>;
 
-    constructor(
-        root: Database,
-        ref: admin.database.Reference,
-        parent: DatabaseDocumentParent,
-        dataValues: D,
-    ) {
+    constructor(root: Database, ref: admin.database.Reference, parent: DatabaseDocumentParent, dataValues: D) {
         super(root, ref, parent, dataValues);
         this.changedListeners = [];
-        if ((parent instanceof Database)) {
-            this.ref.on("value", snap => {
+        if (parent instanceof Database) {
+            this.ref.on("value", (snap) => {
                 this._onSnap(snap);
                 console.error("onSnap", this._rawValue());
             });
@@ -47,7 +42,6 @@ export class RealtimeDocument<D extends DocumentData> extends DatabaseDocument<D
             this.changedListeners.splice(index, 1);
         }
     }
-
 }
 
 type OnDocumentChangedCallback<T extends RealtimeDocument<any>> = (doc: T) => any;

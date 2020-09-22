@@ -2,8 +2,8 @@ import * as admin from "firebase-admin";
 import {Database, DatabaseCollection, DocumentData, DocumentDataConstructor, IsCollectionParent} from "../internal";
 
 /**
- * RealtimeCollection class for Realtime Flashbase Library
- * https://github.com/phamngocduy98/node_flashbase_library
+ * RealtimeCollection class for FlashData - Realtime Database Library
+ * https://github.com/phamngocduy98/node_flashdata_library
  */
 export class RealtimeCollection<D extends DocumentData> extends DatabaseCollection<D> {
     constructor(
@@ -13,9 +13,6 @@ export class RealtimeCollection<D extends DocumentData> extends DatabaseCollecti
         itemConstructor: DocumentDataConstructor<D>
     ) {
         super(root, parent, ref, itemConstructor);
-        this.addedListeners = [];
-        this.changedListeners = [];
-        this.removedListeners = [];
         this.ref.on("child_added", (snap, prevKey) => {
             let doc = this.child(snap.key!);
             doc._onSnap(snap);

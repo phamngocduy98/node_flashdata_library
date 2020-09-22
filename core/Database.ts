@@ -2,8 +2,8 @@ import * as admin from "firebase-admin";
 import {IsCollectionParent} from "../internal";
 
 /**
- * Database class for Realtime Flashbase Library
- * https://github.com/phamngocduy98/node_flashbase_library
+ * Database class for FlashData - Realtime Database Library
+ * https://github.com/phamngocduy98/node_flashdata_library
  */
 export class Database extends IsCollectionParent {
     root?: Database | undefined; // useless

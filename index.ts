@@ -7,5 +7,5 @@ export {
     NestedDocument,
     MapArray,
     Collection,
-    LinkDocument,
+    LinkDocument
 } from "./internal";

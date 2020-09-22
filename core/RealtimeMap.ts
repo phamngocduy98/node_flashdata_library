@@ -3,15 +3,11 @@ import * as admin from "firebase-admin";
 import {AbstractRealtimeList} from "../abstract/AbstractRealtimeList";
 
 /**
- * RealtimeMap class for Realtime Flashbase Library
- * https://github.com/phamngocduy98/node_flashbase_library
+ * RealtimeMap class for FlashData - Realtime Database Library
+ * https://github.com/phamngocduy98/node_flashdata_library
  */
 export class RealtimeMap<D extends string | number | boolean> extends AbstractRealtimeList<D> {
-    constructor(
-        public root: Database,
-        public ref: admin.database.Reference,
-        public parent: IsCollectionParent,
-    ) {
+    constructor(public root: Database, public ref: admin.database.Reference, public parent: IsCollectionParent) {
         super(root, ref);
         this.ref.on("child_added", (snap, prevKey) => {
             let value = snap.val();
@@ -45,7 +41,7 @@ export class RealtimeMap<D extends string | number | boolean> extends AbstractRe
 
     _onSnap(snap: admin.database.DataSnapshot): void {
         this._list.clear();
-        snap.forEach(childSnap => {
+        snap.forEach((childSnap) => {
             this._listSet(childSnap.key!, childSnap.val());
         });
     }

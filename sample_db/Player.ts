@@ -1,4 +1,4 @@
-import {DocumentData, NestedDocument} from "../internal";
+import {DocumentData} from "../internal";
 
 export class Player extends DocumentData {
     constructor(

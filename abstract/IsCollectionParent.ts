@@ -5,19 +5,17 @@ import {
     getRegisteredCollections,
     IDatabaseEntity,
     RealtimeCollection,
-    RealtimeMap,
+    RealtimeMap
 } from "../internal";
 
 /**
- * IsCollectionParent class for Realtime Flashbase Library
- * https://github.com/phamngocduy98/node_flashbase_library
+ * IsCollectionParent class for FlashData - Realtime Database Library
+ * https://github.com/phamngocduy98/node_flashdata_library
  */
 export abstract class IsCollectionParent extends IDatabaseEntity {
     private collections: Map<string, AbstractRealtimeList<any>>;
 
-    protected constructor(
-        ref: admin.database.Reference
-    ) {
+    protected constructor(ref: admin.database.Reference) {
         super(ref);
         this.collections = new Map();
         this.constructCollectionFrom(this);
@@ -30,13 +28,22 @@ export abstract class IsCollectionParent extends IDatabaseEntity {
             let key = collection.collectionName;
             if (collection.dataConstructor !== undefined) {
                 // console.warn("register RealtimeCollection at " + key);
-                const collectionInstance = new RealtimeCollection<any>(this.getRoot(), this, this.ref.child(collection.collectionName), collection.dataConstructor);
+                const collectionInstance = new RealtimeCollection<any>(
+                    this.getRoot(),
+                    this,
+                    this.ref.child(collection.collectionName),
+                    collection.dataConstructor
+                );
                 this.collections.set(collection.collectionName, collectionInstance);
                 (source as any)[key] = collectionInstance.value();
                 (this as any)[key] = collectionInstance;
             } else if (collection.type !== undefined) {
                 // console.warn("register RealtimeMap at " + key);
-                const realtimeMapArrayInstance = new RealtimeMap(this.getRoot(), this.ref.child(collection.collectionName), this);
+                const realtimeMapArrayInstance = new RealtimeMap(
+                    this.getRoot(),
+                    this.ref.child(collection.collectionName),
+                    this
+                );
                 this.collections.set(collection.collectionName, realtimeMapArrayInstance);
                 (source as any)[key] = realtimeMapArrayInstance.value();
                 (this as any)[key] = realtimeMapArrayInstance;

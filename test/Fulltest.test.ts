@@ -1,30 +1,41 @@
-import 'mocha';
-import {expect} from 'chai';
-import * as admin from 'firebase-admin';
-
+import "mocha";
+import {expect} from "chai";
+import * as admin from "firebase-admin";
+import {config} from "dotenv";
+import {resolve} from "path";
 import {RealtimeCollection, RealtimeDocument, RealtimeMap} from "..";
 
 import {MyDatabase} from "../sample_db/MyDatabase";
-import {User} from "../../flashstore/sample_db/User";
+import {User} from "../sample_db/User";
 import {Player} from "../sample_db/Player";
 import {Room} from "../sample_db/Room";
 import {State} from "../sample_db/State";
+import {SortedArray} from "../SortedArray";
 
-import serviceAccount from "../../../../../masoibot-9d4ef-firebase-adminsdk-utx7q-142ac128b1.json";
-import set = Reflect.set;
+config({path: resolve(__dirname, "../.env")});
 
 admin.initializeApp({
     credential: admin.credential.cert({
-        privateKey: serviceAccount.private_key,
-        clientEmail: serviceAccount.client_email,
-        projectId: serviceAccount.project_id,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY ?? "",
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL ?? "",
+        projectId: process.env.FIREBASE_PROJECT_ID ?? ""
     }),
-    databaseURL: "https://masoibot-9d4ef.firebaseio.com/"
+    databaseURL: process.env.FIREBASE_DATABASE_URL ?? ""
 });
 const db = new MyDatabase(admin.database());
 
 describe("RealtimeBase library and database structure test", function () {
     this.timeout(10000);
+
+    it("sortedArray", (done) => {
+        let a = new SortedArray<number>();
+        a.push(2, 2, 3, 3, 2, 1, 1, 3, 3, 3, 2, 1);
+        expect(a).to.have.lengthOf(3);
+        expect(a[0]).to.equal(1);
+        expect(a[1]).to.equal(2);
+        expect(a[2]).to.equal(3);
+        done();
+    });
 
     it("create/get document", async () => {
         let newUserData = new User("testing user", "avatar");
@@ -38,9 +49,11 @@ describe("RealtimeBase library and database structure test", function () {
 
     it("get collection documents", async () => {
         let users = await db.users.children();
-        console.info(await Promise.all(users.map(user => user.value())));
+        console.info(await Promise.all(users.map((user) => user.value())));
         expect(users, "check result length").to.have.length.greaterThan(0);
-        expect(await users[0].value(), "check result document data: check property name").to.have.haveOwnProperty("name");
+        expect(await users[0].value(), "check result document data: check property name").to.have.haveOwnProperty(
+            "name"
+        );
     });
 
     it("check methods and properties", async () => {
@@ -53,10 +66,19 @@ describe("RealtimeBase library and database structure test", function () {
     });
 
     it("create complex-nested object, access nested object / collection", async () => {
-        let testRoomDoc = await db.rooms.set("test_room", new Room(new State(
-            "111", new Map([["1", 1], ["2", 2]]),
-            new Map<string, Player>([["duy1", new Player("duy1", "Duy", "avatar", true)]]),
-        )));
+        let testRoomDoc = await db.rooms.set(
+            "test_room",
+            new Room(
+                new State(
+                    "111",
+                    new Map([
+                        ["1", 1],
+                        ["2", 2]
+                    ]),
+                    new Map<string, Player>([["duy1", new Player("duy1", "Duy", "avatar", true)]])
+                )
+            )
+        );
         console.log(await testRoomDoc.value());
         let stateDoc = testRoomDoc.nested<State>("state")!;
         console.log(await stateDoc.value());
@@ -71,10 +93,10 @@ describe("RealtimeBase library and database structure test", function () {
 
     it("update nested object", async () => {
         let testRoomDoc = await db.rooms.child("test_room");
-        testRoomDoc.update({
+        await testRoomDoc.update({
             state: {
-                roomId: "222",
-            },
+                roomId: "222"
+            }
         });
         console.log(await testRoomDoc.value());
         let stateDoc = (await testRoomDoc.nested("state"))!;
@@ -92,17 +114,19 @@ describe("RealtimeBase library and database structure test", function () {
     });
 
     it("Collection test", async () => {
-        let players = db.getChild("rooms/test_room/state/players") as RealtimeCollection<Player>;
+        let players = (db.getChild("rooms/test_room/state/players") as unknown) as RealtimeCollection<Player>;
         expect(players).to.not.null;
         await players.clearCollection();
         const batchAddTasks = [];
         for (let i = 0; i < 5; i++) {
-            batchAddTasks.push(players.set(undefined, {
-                playerId: "player" + i,
-                avatar: "avatar" + i,
-                name: "Player" + i,
-                alive: true
-            }));
+            batchAddTasks.push(
+                players.set(undefined, {
+                    playerId: "player" + i,
+                    avatar: "avatar" + i,
+                    name: "Player" + i,
+                    alive: true
+                })
+            );
         }
         await Promise.all(batchAddTasks);
         await players.set("playerZ", {

@@ -4,8 +4,8 @@ import * as admin from "firebase-admin";
 import {SortedArray} from "../SortedArray";
 
 /**
- * AbstractRealtimeList class for Realtime Flashbase Library
- * https://github.com/phamngocduy98/node_flashbase_library
+ * AbstractRealtimeList class for FlashData - Realtime Database Library
+ * https://github.com/phamngocduy98/node_flashdata_library
  */
 export abstract class AbstractRealtimeList<D> extends IDatabaseEntity {
     protected _list: Map<string, D>;
@@ -14,10 +14,7 @@ export abstract class AbstractRealtimeList<D> extends IDatabaseEntity {
     changedListeners: Array<ListOnChangedCallback<D>>;
     removedListeners: Array<ListOnRemovedCallback<D>>;
 
-    protected constructor(
-        public root: Database,
-        ref: admin.database.Reference
-    ) {
+    protected constructor(public root: Database, ref: admin.database.Reference) {
         super(ref);
         this._list = new Map();
         this._arrayIndex = new SortedArray<string>();
