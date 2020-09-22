@@ -1,4 +1,13 @@
 # FlashData - Realtime Database
+![npm](https://img.shields.io/npm/v/@phamngocduy98/flashdata)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/phamngocduy98/node_flashdata_library/Coverage%20check)
+![npm](https://img.shields.io/npm/dt/@phamngocduy98/flashdata)
+![node-lts (scoped)](https://img.shields.io/node/v-lts/@phamngocduy98/flashdata)
+![npm peer dependency version (scoped)](https://img.shields.io/npm/dependency-version/@phamngocduy98/flashdata/dev/typescript)
+![GitHub package.json dependency version (prod)](https://img.shields.io/github/package-json/dependency-version/phamngocduy98/node_flashdata_library/firebase-admin)
+```
+npm i @phamngocduy98/flashdata
+```
 
 A realtime database library that making it easier to CRUD data with typescript
 
@@ -14,7 +23,7 @@ So, your data is now collections and documents :D
 Define properties of your document by extending `DocumentData` class
 
 ```typescript
-import {DocumentData} from "../";
+import {DocumentData} from "@phamngocduy98/flashdata";
 
 export class User extends DocumentData {
     name: string;
@@ -50,7 +59,7 @@ For example, you have a root collection whose name is `users`
 Use `@Collection` decorator tells the library what is the type of collection's document.
 
 ```typescript
-import {Collection, Database, RealtimeCollection} from "./.";
+import {Collection, Database, RealtimeCollection} from "@phamngocduy98/flashdata";
 import {User} from "./";
 
 export class MyDatabase extends Database {
@@ -62,7 +71,7 @@ export class MyDatabase extends Database {
 Then you have subcollection, here is the example how to define a subcollection:
 
 ```typescript
-import {Collection, DocumentData, MapArray} from "../";
+import {Collection, DocumentData} from "@phamngocduy98/flashdata";
 import {Player} from "./Player";
 
 export class State extends DocumentData {
