@@ -61,7 +61,8 @@ export class RealtimeMap<D extends string | number | boolean> extends AbstractRe
 
     set(key: string | undefined, value: D | null): Promise<any> {
         if (key !== undefined) return this.ref.update({[key]: value});
-        return this.ref.push(value);
+        const pushRes = this.ref.push(value);
+        return new Promise<any>((rs, rj) => pushRes.then(rs).catch(rj));
     }
 
     get(key: string): D | undefined {
@@ -74,8 +75,8 @@ export class RealtimeMap<D extends string | number | boolean> extends AbstractRe
     }
 
     getChild(path: string): IDatabaseEntity | undefined {
-        const paths = path.split("/");
-        let child = this._list.get(paths[0]);
+        // const paths = path.split("/");
+        // let child = this._list.get(paths[0]);
         return undefined; // TODO: its child's type is not IDabaseEntity so it got undefined
     }
 }
