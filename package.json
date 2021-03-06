@@ -1,6 +1,6 @@
 {
     "name": "@phamngocduy98/flashdata",
-    "version": "0.0.1a",
+    "version": "0.0.1-alpha.0",
     "description": "A realtime database library that making it easier to CRUD data with typescript",
     "main": "./build/index.js",
     "types": "./build/index.d.ts",
@@ -11,7 +11,7 @@
         "build"
     ],
     "engines": {
-        "node": "^12"
+        "node": ">=12"
     },
     "scripts": {
         "test": "mocha --exit --require ts-node/register ./test/**/*.ts",
