@@ -14,9 +14,12 @@ import {
 } from "../internal";
 
 export type DatabaseDocumentConstructor<D extends DocumentData> = {
-    new (root: Database, ref: admin.database.Reference, parent: DatabaseDocumentParent, dataValue: D): DatabaseDocument<
-        D
-    >;
+    new (
+        root: Database,
+        ref: admin.database.Reference,
+        parent: DatabaseDocumentParent,
+        dataValue: D
+    ): DatabaseDocument<D>;
 };
 export type DatabaseDocumentParent = DatabaseCollection<any> | Database | DatabaseDocument<any>;
 export type DocumentDataOf<T> = T extends DatabaseDocument<infer D> ? D : never;
